@@ -1,0 +1,974 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JS DARK — спецификация фурнитуры капсулы</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230a0a0c'/%3E%3Ctext x='16' y='23' font-family='Georgia' font-size='20' font-weight='700' fill='%235a141e' text-anchor='middle'%3EJ%3C/text%3E%3C/svg%3E">
+<style>
+
+  /* ============================================================
+     JS DARK — spec sheet / lookbook
+     Токены, база
+     ============================================================ */
+
+  :root{
+    --bg:        #0a0a0c;
+    --bg-2:      #0e0e11;
+    --panel:     #131316;
+    --panel-2:   #18181c;
+    --panel-3:   #1d1d21;
+
+    --hair:      rgba(255,255,255,.06);
+    --hair-2:    rgba(255,255,255,.12);
+    --hair-3:    rgba(255,255,255,.20);
+
+    --ink:       #dddee2;
+    --ink-dim:   #93949b;
+    --ink-faint: #58595f;
+
+    /* ganmetal / black nickel — основной металлический язык */
+    --gm-shadow: #1b1d21;
+    --gm-base:   #4a4d54;
+    --gm-mid:    #62656c;
+    --gm-hi:     #a3a7af;
+
+    --bn-base:   #1d1e22;
+    --bn-hi:     #3c3e44;
+
+    /* oxidized brass — единственный премиальный акцент, одна деталь */
+    --brass-shadow:#1d150c;
+    --brass-base:  #5e4527;
+    --brass-mid:   #8a683d;
+    --brass-hi:    #c8a066;
+
+    /* oxblood — единственный цветной акцент капсулы, ≤5% периметра */
+    --oxblood:     #591420;
+    --oxblood-hi:  #82212c;
+
+    --graphite:    #2b2b2e;
+    --graphite-hi: #47474b;
+
+    --r-corner: 18%; /* системный срез угла — используется на накладке, шильде, хэнгтеге */
+
+    --f-grotesk: "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+    --f-mono: ui-monospace, "SF Mono", "Cascadia Mono", "JetBrains Mono", Consolas, "Roboto Mono", monospace;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ background:var(--bg); }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family: var(--f-grotesk);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    position:relative;
+  }
+
+  /* film grain — тонкая атмосфера на весь документ */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    z-index:2000;
+    pointer-events:none;
+    opacity:.05;
+    mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  /* лёгкая виньетка */
+  body::after{
+    content:"";
+    position:fixed; inset:0;
+    z-index:1999;
+    pointer-events:none;
+    background: radial-gradient(ellipse at 50% 0%, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 55%, rgba(0,0,0,.55) 100%);
+  }
+
+  a{ color:inherit; }
+
+  .wrap{ max-width:1280px; margin:0 auto; padding:0 32px; }
+
+  /* ------------------------------------------------------------
+     Верхняя техническая панель
+     ------------------------------------------------------------ */
+  .topbar{
+    position:sticky; top:0; z-index:500;
+    background:rgba(10,10,12,.82);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--hair);
+  }
+  .topbar__row{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:20px; padding:14px 32px;
+    max-width:1280px; margin:0 auto;
+  }
+  .topbar__brand{
+    font-weight:800; letter-spacing:.04em; font-size:15px;
+    font-stretch:condensed; text-transform:uppercase;
+    display:flex; align-items:baseline; gap:8px;
+  }
+  .topbar__brand small{
+    font-family:var(--f-mono); font-weight:500; color:var(--oxblood-hi);
+    font-size:11px; letter-spacing:.12em;
+  }
+  .topbar__index{
+    display:flex; gap:2px; overflow-x:auto; scrollbar-width:none;
+  }
+  .topbar__index::-webkit-scrollbar{ display:none; }
+  .topbar__index a{
+    font-family:var(--f-mono); font-size:11px; color:var(--ink-faint);
+    text-decoration:none; padding:6px 9px; border-radius:3px;
+    letter-spacing:.04em; white-space:nowrap;
+    transition:color .15s ease, background .15s ease;
+  }
+  .topbar__index a:hover{ color:var(--ink); background:var(--panel-2); }
+  .topbar__meta{
+    font-family:var(--f-mono); font-size:10.5px; color:var(--ink-faint);
+    letter-spacing:.06em; white-space:nowrap; text-transform:uppercase;
+  }
+
+  /* ------------------------------------------------------------
+     HERO
+     ------------------------------------------------------------ */
+  .hero{
+    position:relative;
+    padding:min(14vw,140px) 0 90px;
+    overflow:hidden;
+    border-bottom:1px solid var(--hair);
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(74,77,84,.16), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 10%, rgba(89,20,32,.10), transparent 55%),
+      var(--bg);
+  }
+  .hero__ghost{
+    position:absolute; right:-6%; top:50%; transform:translateY(-46%);
+    font-family:var(--f-grotesk); font-weight:800; font-stretch:condensed;
+    font-size:min(58vw,760px); line-height:1; color:rgba(255,255,255,.025);
+    letter-spacing:-.03em; user-select:none; pointer-events:none;
+  }
+  .hero__eyebrow{
+    font-family:var(--f-mono); font-size:12px; letter-spacing:.22em;
+    color:var(--oxblood-hi); text-transform:uppercase; margin:0 0 22px;
+    display:flex; align-items:center; gap:12px;
+  }
+  .hero__eyebrow::before{ content:""; width:26px; height:1px; background:var(--oxblood-hi); display:inline-block; }
+  .hero h1{
+    font-size:clamp(3rem,10vw,7.4rem); line-height:.88; margin:0;
+    font-weight:800; font-stretch:condensed; letter-spacing:-.02em;
+    text-transform:uppercase;
+  }
+  .hero h1 span{ color:var(--ink-faint); -webkit-text-stroke:1px var(--ink-faint); color:transparent; }
+  .hero__sub{
+    margin:26px 0 0; max-width:640px; color:var(--ink-dim);
+    font-size:15.5px; line-height:1.7; font-weight:400;
+  }
+  .hero__row{
+    margin-top:48px; display:flex; flex-wrap:wrap; gap:14px 40px;
+    border-top:1px solid var(--hair); padding-top:22px; max-width:820px;
+  }
+  .hero__stat dt{
+    font-family:var(--f-mono); font-size:10px; letter-spacing:.12em;
+    color:var(--ink-faint); text-transform:uppercase; margin:0 0 6px;
+  }
+  .hero__stat dd{ margin:0; font-size:14px; color:var(--ink); font-weight:600; }
+
+  /* ------------------------------------------------------------
+     Секции — общие
+     ------------------------------------------------------------ */
+  section{ padding:86px 0; border-bottom:1px solid var(--hair); }
+  section:last-of-type{ border-bottom:none; }
+
+  .sec-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:24px; margin-bottom:44px; flex-wrap:wrap; }
+  .sec-head__num{ font-family:var(--f-mono); font-size:12px; color:var(--oxblood-hi); letter-spacing:.1em; }
+  .sec-head h2{
+    font-size:clamp(1.7rem,3.4vw,2.5rem); margin:6px 0 0; font-weight:800;
+    font-stretch:condensed; text-transform:uppercase; letter-spacing:-.01em; line-height:1.05;
+  }
+  .sec-head p{ max-width:420px; color:var(--ink-dim); font-size:13.5px; line-height:1.65; margin:0; }
+
+  .chip{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:var(--f-mono); font-size:10.5px; letter-spacing:.06em;
+    color:var(--ink-dim); background:var(--panel-2); border:1px solid var(--hair-2);
+    padding:5px 10px; border-radius:3px; text-transform:uppercase;
+  }
+
+  /* ============================================================
+     ПАЛИТРА
+     ============================================================ */
+  .palette-grid{
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:1px;
+    background:var(--hair); border:1px solid var(--hair);
+  }
+  .swatch{ background:var(--bg); padding:22px 20px 20px; position:relative; }
+  .swatch__field{
+    height:96px; border-radius:2px; position:relative; overflow:hidden;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
+  }
+  .swatch__brush{
+    position:absolute; inset:0;
+    background-image:repeating-linear-gradient(97deg, rgba(255,255,255,.05) 0 1px, transparent 1px 3px);
+    mix-blend-mode:overlay;
+  }
+  .swatch__name{ margin:16px 0 2px; font-size:13px; font-weight:700; letter-spacing:.01em; }
+  .swatch__role{ margin:0 0 10px; font-size:11.5px; color:var(--ink-dim); line-height:1.5; }
+  .swatch__hex{ font-family:var(--f-mono); font-size:11px; color:var(--ink-faint); letter-spacing:.03em; display:flex; justify-content:space-between; }
+
+  /* ============================================================
+     ПРАВИЛО КОНТРАСТА
+     ============================================================ */
+  .contrast-layout{ display:grid; grid-template-columns: 340px 1fr; gap:60px; align-items:center; }
+  @media (max-width:860px){ .contrast-layout{ grid-template-columns:1fr; } }
+
+  .value-scale{ display:flex; flex-direction:column; gap:14px; margin-top:28px; }
+  .value-row{ display:grid; grid-template-columns:52px 1fr 90px; align-items:center; gap:14px; }
+  .value-row__sw{ height:40px; border-radius:2px; box-shadow:inset 0 0 0 1px rgba(255,255,255,.08); }
+  .value-row__label{ font-size:12.5px; color:var(--ink-dim); line-height:1.4; }
+  .value-row__label b{ color:var(--ink); font-weight:700; display:block; font-size:13px; }
+  .value-row__pct{ font-family:var(--f-mono); font-size:12px; color:var(--ink-faint); text-align:right; }
+
+  .wb-mock{
+    margin-top:30px; display:flex; align-items:flex-end; gap:22px; flex-wrap:wrap;
+  }
+  .wb-card{
+    width:168px; height:168px; border-radius:3px; position:relative; overflow:hidden;
+    background:
+      repeating-linear-gradient(115deg, #0d1016 0 3px, #0a0c11 3px 6px);
+    box-shadow:0 0 0 1px var(--hair-2), 0 20px 40px rgba(0,0,0,.5);
+  }
+  .wb-card__loop{ position:absolute; left:38%; top:0; width:14px; height:30px; background:linear-gradient(#161822,#0c0d12); border-radius:0 0 6px 6px; }
+  .wb-card__btn{ position:absolute; left:50%; top:44%; transform:translate(-50%,-50%) scale(.19); }
+  .wb-card__caption{ position:absolute; left:8px; bottom:8px; font-family:var(--f-mono); font-size:9px; color:rgba(255,255,255,.35); letter-spacing:.05em; }
+  .wb-note{ max-width:280px; font-size:12.5px; color:var(--ink-dim); line-height:1.6; }
+  .wb-note b{ color:var(--ink); }
+
+  /* ============================================================
+     ТИПОГРАФИКА
+     ============================================================ */
+  .type-grid{ display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--hair); border:1px solid var(--hair); }
+  @media (max-width:800px){ .type-grid{ grid-template-columns:1fr; } }
+  .type-card{ background:var(--bg); padding:36px; }
+  .type-card__tag{ font-family:var(--f-mono); font-size:10.5px; color:var(--oxblood-hi); letter-spacing:.14em; text-transform:uppercase; margin-bottom:18px; display:block; }
+  .type-card__sample-a{
+    font-family:var(--f-grotesk); font-weight:800; font-stretch:condensed;
+    font-size:clamp(2.2rem,4vw,3.2rem); text-transform:uppercase; letter-spacing:.01em; line-height:1.02; margin:0 0 14px;
+  }
+  .type-card__sample-b{
+    font-family:var(--f-mono); font-size:1.5rem; letter-spacing:.14em; color:var(--ink); margin:0 0 14px;
+  }
+  .type-card__stack{ font-family:var(--f-mono); font-size:11px; color:var(--ink-faint); line-height:1.7; margin:0; word-break:break-word; }
+  .type-card__note{ font-size:12.5px; color:var(--ink-dim); line-height:1.6; margin:14px 0 0; padding-top:14px; border-top:1px solid var(--hair); }
+
+  /* ============================================================
+     СЕТКА ПОЗИЦИЙ
+     ============================================================ */
+  .positions-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:1px; background:var(--hair); border:1px solid var(--hair); }
+  .card{ background:var(--bg); padding:26px 26px 28px; display:flex; flex-direction:column; }
+  .card--featured{ grid-column:span 2; }
+  @media (max-width:760px){ .card--featured{ grid-column:span 1; } }
+
+  .card__top{ display:flex; align-items:baseline; gap:12px; margin-bottom:18px; }
+  .card__num{ font-family:var(--f-mono); font-size:12px; color:var(--oxblood-hi); letter-spacing:.05em; }
+  .card__title{ font-size:15.5px; font-weight:800; text-transform:uppercase; font-stretch:condensed; letter-spacing:.01em; margin:0; flex:1; }
+  .card__dim{ font-family:var(--f-mono); font-size:10.5px; color:var(--ink-faint); letter-spacing:.03em; white-space:nowrap; }
+
+  .card__stage{
+    position:relative; height:230px; border-radius:3px; margin-bottom:20px;
+    display:flex; align-items:center; justify-content:center;
+    background:
+      linear-gradient(var(--hair) 1px, transparent 1px) 0 0/22px 22px,
+      linear-gradient(90deg, var(--hair) 1px, transparent 1px) 0 0/22px 22px,
+      radial-gradient(ellipse 70% 70% at 50% 45%, rgba(255,255,255,.025), transparent 70%),
+      var(--panel);
+    box-shadow:inset 0 0 0 1px var(--hair);
+    overflow:hidden;
+  }
+  .card--featured .card__stage{ height:280px; }
+
+  .card__tags{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+  .card__text{ font-size:12.8px; line-height:1.65; color:var(--ink-dim); margin:0; }
+  .card__text b{ color:var(--ink); font-weight:600; }
+  .card__where{
+    margin-top:auto; padding-top:14px; margin-top:16px; border-top:1px solid var(--hair);
+    font-family:var(--f-mono); font-size:10.5px; color:var(--ink-faint); letter-spacing:.03em;
+    text-transform:uppercase; display:flex; gap:8px; align-items:baseline;
+  }
+  .card__where b{ color:var(--gm-hi); font-family:var(--f-grotesk); font-size:12px; letter-spacing:.02em; text-transform:none; font-weight:700; }
+
+  /* ---- reusable material textures ---- */
+  .tex-brush-dark{ background-image:repeating-linear-gradient(96deg, rgba(255,255,255,.055) 0 1px, transparent 1px 3px); mix-blend-mode:overlay; }
+  .tex-brush-brass{ background-image:repeating-linear-gradient(96deg, rgba(255,220,170,.05) 0 1px, transparent 1px 3px); mix-blend-mode:overlay; }
+  .guilloche{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='28'%3E%3Cpath d='M-4 14 C4 4,12 24,20 14 S36 4,44 14 S60 24,68 14' stroke='rgba(255,255,255,0.10)' stroke-width='1' fill='none'/%3E%3Cpath d='M-4 6 C4 -4,12 16,20 6 S36 -4,44 6 S60 16,68 6' stroke='rgba(255,255,255,0.05)' stroke-width='1' fill='none'/%3E%3Cpath d='M-4 22 C4 12,12 32,20 22 S36 12,44 22 S60 32,68 22' stroke='rgba(255,255,255,0.05)' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+    background-repeat:repeat;
+  }
+  .board-grain{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.4'/%3E%3C/svg%3E");
+    mix-blend-mode:overlay;
+  }
+
+  /* ============================================================
+     01 — ПУГОВИЦА
+     ============================================================ */
+  .btn-wrap{ position:relative; width:186px; height:186px; }
+  .btn-knurl{
+    position:absolute; inset:-7px; border-radius:50%;
+    background:repeating-conic-gradient(rgba(255,255,255,.16) 0deg 3deg, rgba(0,0,0,.4) 3deg 6deg);
+  }
+  .btn-disc{
+    position:absolute; inset:0; border-radius:50%; overflow:hidden;
+    background:conic-gradient(from 150deg, var(--gm-mid), var(--gm-base) 28%, var(--gm-shadow) 52%, var(--gm-base) 78%, var(--gm-mid));
+    box-shadow:inset 0 0 0 9px var(--bn-base), 0 14px 26px rgba(0,0,0,.55);
+  }
+  .btn-disc::before{ content:""; position:absolute; inset:0; }
+  .btn-bevel{
+    position:absolute; inset:9px; border-radius:50%;
+    box-shadow:inset 0 2px 3px rgba(255,255,255,.30), inset 0 -3px 5px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.12);
+  }
+  .btn-face{ position:absolute; inset:9px; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .btn-js{
+    font-family:var(--f-grotesk); font-weight:800; font-stretch:condensed; font-size:2.6rem;
+    color:#37393e; letter-spacing:-.02em;
+    text-shadow: -1px -1px 1px rgba(255,255,255,.12), 1px 1px 1px rgba(0,0,0,.6);
+  }
+  .btn-groove{ width:44%; height:2px; margin:9px 0 8px; border-radius:2px; background:linear-gradient(90deg, transparent, rgba(0,0,0,.7) 20%, rgba(0,0,0,.7) 80%, transparent); box-shadow:0 1px 0 rgba(255,255,255,.08); }
+  .btn-code{ font-family:var(--f-mono); font-size:11px; letter-spacing:.32em; color:var(--ink-dim); text-shadow:0 0 4px rgba(220,221,225,.12); padding-left:.32em; }
+
+  /* ============================================================
+     02 — ХОЛЬНИТЕН
+     ============================================================ */
+  .riv-disc{
+    width:104px; height:104px; border-radius:50%; position:relative; overflow:hidden;
+    background:conic-gradient(from 120deg, var(--gm-mid), var(--gm-base) 30%, var(--gm-shadow) 55%, var(--gm-base) 82%, var(--gm-mid));
+    box-shadow:0 0 0 1px rgba(255,255,255,.10), 0 10px 22px rgba(0,0,0,.5);
+  }
+  .riv-bevel{ position:absolute; inset:6px; border-radius:50%; box-shadow:inset 0 2px 3px rgba(255,255,255,.28), inset 0 -2px 4px rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; }
+  .riv-star svg{ width:34px; height:34px; filter:drop-shadow(0 1px 0 rgba(255,255,255,.14)) drop-shadow(0 -1px 1px rgba(0,0,0,.5)); }
+
+  /* ============================================================
+     03 — СОБАЧКА МОЛНИИ
+     ============================================================ */
+  .zip-stage-inner{ display:flex; flex-direction:column; align-items:center; }
+  .zip-bail{ width:24px; height:24px; border-radius:50%; border:5px solid var(--gm-mid); box-shadow:inset 0 1px 1px rgba(255,255,255,.22), 0 2px 3px rgba(0,0,0,.4); margin-bottom:-9px; position:relative; z-index:2; }
+  .zip-tab{
+    width:58px; height:34px; position:relative; overflow:hidden;
+    clip-path:polygon(0 0,100% 0,100% 62%,72% 100%,0 100%);
+    background:conic-gradient(from 140deg, var(--gm-mid), var(--gm-base) 30%, var(--gm-shadow) 60%, var(--gm-mid));
+    box-shadow:0 8px 18px rgba(0,0,0,.5);
+  }
+  .zip-tab__mark{ position:absolute; left:8px; top:2px; font-family:var(--f-grotesk); font-weight:800; font-stretch:condensed; font-size:2.1rem; color:#37393e; text-shadow:-1px -1px 1px rgba(255,255,255,.12), 1px 1px 1px rgba(0,0,0,.6); }
+  .zip-teeth{ margin-top:14px; width:150px; height:16px; border-radius:2px; background:repeating-linear-gradient(90deg,#141417 0 3px,#0e0e10 3px 6px); box-shadow:inset 0 0 0 1px var(--hair); position:relative; }
+  .zip-teeth::after{ content:"ТЕСЬМА · ЗУБЦЫ ЧЕРНЁНЫЕ"; position:absolute; left:0; top:22px; font-family:var(--f-mono); font-size:8.5px; letter-spacing:.08em; color:var(--ink-faint); white-space:nowrap; }
+
+  /* ============================================================
+     04 — НАКЛАДКА
+     ============================================================ */
+  .patch{
+    position:relative; width:270px; height:154px; overflow:hidden;
+    clip-path:polygon(0 0,100% 0,100% 82%,82% 100%,0 100%);
+    background:
+      radial-gradient(ellipse at 22% 26%, rgba(255,255,255,.035), transparent 42%),
+      radial-gradient(ellipse at 78% 74%, rgba(0,0,0,.30), transparent 46%),
+      linear-gradient(160deg,#232326,#17171a 60%,#1d1d20);
+    box-shadow:0 16px 30px rgba(0,0,0,.5);
+  }
+  .patch__guilloche{ position:absolute; inset:0; }
+  .patch__center{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .patch__js{ font-family:var(--f-grotesk); font-weight:800; font-stretch:condensed; font-size:2.9rem; color:#28282b; text-shadow:-1px -1px 1px rgba(255,255,255,.10), 1px 1px 1px rgba(0,0,0,.6); }
+  .patch__est{ position:absolute; top:12px; right:16px; font-family:var(--f-mono); font-size:8px; letter-spacing:.1em; color:#2c2c30; text-shadow:-1px -1px 0 rgba(255,255,255,.1); }
+
+  /* ============================================================
+     05 — ТКАНАЯ ЭТИКЕТКА
+     ============================================================ */
+  .label-weave{
+    width:236px; height:78px; border-radius:2px; position:relative; overflow:hidden;
+    background:repeating-linear-gradient(45deg,#1b1b1e 0 3px,#1f1f22 3px 6px);
+    box-shadow:0 10px 22px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.05);
+  }
+  .label-weave::before{ content:""; position:absolute; inset:0; background:linear-gradient(115deg, transparent 30%, rgba(255,255,255,.06) 48%, transparent 62%); }
+  .label-weave__t{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; }
+  .label-weave__a{ font-family:var(--f-grotesk); font-weight:700; font-stretch:condensed; font-size:15px; letter-spacing:.14em; color:#4d4d53; text-shadow:-1px -1px 0 rgba(255,255,255,.12), 1px 1px 1px rgba(0,0,0,.5); }
+  .label-weave__b{ font-family:var(--f-mono); font-size:8.5px; letter-spacing:.14em; color:#45454b; }
+
+  /* ============================================================
+     06 — ШИЛЬДА
+     ============================================================ */
+  .shield{
+    position:relative; width:230px; height:132px; overflow:hidden;
+    clip-path:polygon(0 0,100% 0,100% 82%,82% 100%,0 100%);
+    background:conic-gradient(from 160deg, var(--brass-mid), var(--brass-base) 30%, var(--brass-shadow) 58%, var(--brass-base) 82%, var(--brass-mid));
+    box-shadow:0 16px 30px rgba(0,0,0,.5);
+  }
+  .shield__rivet{ position:absolute; top:10px; width:8px; height:8px; border-radius:50%; background:radial-gradient(circle at 35% 30%, var(--brass-hi), var(--brass-shadow) 70%); box-shadow:0 1px 1px rgba(0,0,0,.5); }
+  .shield__js{ position:absolute; right:-6px; bottom:14px; font-family:var(--f-grotesk); font-weight:800; font-stretch:condensed; font-size:3.6rem; color:var(--brass-shadow); text-shadow:-1px -1px 1px rgba(255,220,170,.18), 1px 1px 1px rgba(0,0,0,.55); }
+
+  /* ============================================================
+     07 — ЛЮВЕРСЫ
+     ============================================================ */
+  .eyelets-row{ display:flex; align-items:center; gap:70px; }
+  .eyelet{ width:52px; height:52px; border-radius:50%; position:relative; background:conic-gradient(from 100deg, var(--gm-mid), var(--gm-base) 40%, var(--gm-shadow) 70%, var(--gm-mid)); box-shadow:0 8px 16px rgba(0,0,0,.5); }
+  .eyelet::after{ content:""; position:absolute; inset:15px; border-radius:50%; background:var(--panel); box-shadow:inset 0 2px 4px rgba(0,0,0,.6); }
+  .eyelets-band{ position:absolute; left:14px; right:14px; bottom:26px; height:2px; background:linear-gradient(90deg, transparent, var(--hair-3) 20%, var(--hair-3) 80%, transparent); }
+
+  /* ============================================================
+     08 — D-КОЛЬЦА
+     ============================================================ */
+  .dring-row{ display:flex; align-items:flex-end; gap:56px; }
+  .dring-col{ display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .dring-col__cap{ font-family:var(--f-mono); font-size:9px; letter-spacing:.08em; color:var(--ink-faint); text-transform:uppercase; }
+  .webbing-tab{ width:26px; height:40px; border-radius:2px; background:linear-gradient(#232327,#17171a); box-shadow:inset 0 0 0 1px var(--hair); }
+  .belt-loop{ width:20px; height:34px; border-radius:3px; background:linear-gradient(#1f1f23,#141417); box-shadow:inset 0 0 0 1px var(--hair); }
+
+  /* ============================================================
+     09 — ЦЕПЬ
+     ============================================================ */
+  .chain-stage svg{ width:100%; max-width:280px; height:auto; }
+
+  /* ============================================================
+     10 — ШНУР
+     ============================================================ */
+  .cord-stage{ position:relative; width:100%; height:100%; }
+  .cord-line{ position:absolute; top:50%; height:6px; border-radius:3px; background:linear-gradient(#3a3a3d,#1c1c1f); box-shadow:0 1px 0 rgba(255,255,255,.08); }
+  .cord-l{ left:16%; width:30%; transform:translateY(-50%) rotate(-3deg); }
+  .cord-r{ right:16%; width:30%; transform:translateY(-50%) rotate(3deg); }
+  .cord-stop{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:30px; height:52px; border-radius:8px; background:conic-gradient(from 130deg, var(--gm-mid), var(--gm-base) 40%, var(--gm-shadow) 70%, var(--gm-mid)); box-shadow:0 10px 20px rgba(0,0,0,.5); }
+  .cord-stop::after{ content:"DK"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:var(--f-mono); font-size:7px; letter-spacing:.06em; color:var(--ink-faint); }
+  .cord-aglet{ position:absolute; top:50%; width:14px; height:8px; border-radius:0 4px 4px 0; background:linear-gradient(var(--gm-hi),var(--gm-shadow)); }
+  .cord-aglet-l{ left:9%; transform:translateY(-50%) rotate(-3deg) scaleX(-1); }
+  .cord-aglet-r{ right:9%; transform:translateY(-50%) rotate(3deg); }
+
+  /* ============================================================
+     11 — ХЭНГТЕГ
+     ============================================================ */
+  .tag-card{
+    position:relative; width:150px; height:206px; overflow:hidden;
+    clip-path:polygon(0 0,100% 0,100% 82%,82% 100%,0 100%);
+    background:linear-gradient(160deg,#131315,#0c0c0e 55%,#101012);
+    box-shadow:0 18px 34px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.05);
+  }
+  .tag-hole{ position:absolute; top:14px; left:50%; transform:translateX(-50%); width:10px; height:10px; border-radius:50%; background:#000; box-shadow:inset 0 1px 2px rgba(0,0,0,.8), 0 1px 0 rgba(255,255,255,.06); }
+  .tag-loop{ position:absolute; top:6px; left:50%; transform:translateX(-50%); width:22px; height:16px; border:2px solid var(--gm-mid); border-bottom:none; border-radius:12px 12px 0 0; }
+  .tag-js{ position:absolute; right:-10px; top:64px; font-family:var(--f-grotesk); font-weight:800; font-stretch:condensed; font-size:3.2rem; color:#232325; text-shadow:-1px -1px 1px rgba(255,255,255,.08), 1px 1px 1px rgba(0,0,0,.6); }
+  .tag-code{ position:absolute; left:14px; bottom:40px; font-family:var(--f-mono); font-size:9px; letter-spacing:.14em; color:var(--ink-faint); }
+  .tag-bars{ position:absolute; left:14px; bottom:18px; display:flex; align-items:flex-end; gap:2px; height:14px; }
+  .tag-bars span{ width:2px; background:var(--ink-faint); opacity:.7; }
+  .tag-seal{ position:absolute; left:50%; bottom:-2px; transform:translateX(-50%); width:34px; height:20px; border-radius:4px; background:conic-gradient(from 120deg, var(--gm-hi), var(--gm-base) 40%, var(--gm-shadow) 75%, var(--gm-hi)); box-shadow:0 6px 14px rgba(0,0,0,.5); opacity:0; }
+
+  /* ============================================================
+     FOOTER
+     ============================================================ */
+  footer{ padding:56px 0 70px; }
+  .foot-row{ display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:20px; }
+  .foot-brand{ font-weight:800; font-stretch:condensed; text-transform:uppercase; letter-spacing:.02em; font-size:15px; }
+  .foot-brand span{ color:var(--oxblood-hi); font-family:var(--f-mono); font-size:11px; letter-spacing:.1em; margin-left:10px; }
+  .foot-note{ max-width:480px; font-size:11.5px; color:var(--ink-faint); line-height:1.7; }
+  .foot-tag{ font-family:var(--f-mono); font-size:10px; color:var(--ink-faint); letter-spacing:.14em; text-transform:uppercase; }
+
+  @media (max-width:640px){
+    .wrap{ padding:0 18px; }
+    .topbar__row{ padding:12px 18px; }
+    section{ padding:56px 0; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ============================================================
+       TOPBAR
+       ============================================================ -->
+  <div class="topbar">
+    <div class="topbar__row">
+      <div class="topbar__brand">JS <small>DARK</small></div>
+      <nav class="topbar__index">
+        <a href="#pos-01">01</a><a href="#pos-02">02</a><a href="#pos-03">03</a><a href="#pos-04">04</a>
+        <a href="#pos-05">05</a><a href="#pos-06">06</a><a href="#pos-07">07</a><a href="#pos-08">08</a>
+        <a href="#pos-09">09</a><a href="#pos-10">10</a><a href="#pos-11">11</a>
+      </nav>
+      <div class="topbar__meta">DK.01 · Капсула фурнитуры</div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       HERO
+       ============================================================ -->
+  <header class="hero">
+    <div class="hero__ghost">JS</div>
+    <div class="wrap">
+      <p class="hero__eyebrow">Industrial / тёмный ворквир</p>
+      <h1>JS DARK<br><span>Furniture&nbsp;Spec</span></h1>
+      <p class="hero__sub">
+        Капсула фурнитуры джинс Jogger Street. Металл перестаёт быть украшением и становится деталью механизма:
+        ганметал и чёрный никель как основной язык, оксидированная латунь — единичный премиальный акцент,
+        oxblood — единственный цветной маркер. Дуговой текст, красная и белая строчка — удалены без замены цветом-компаньоном.
+      </p>
+      <dl class="hero__row">
+        <div class="hero__stat"><dt>Позиций</dt><dd>11</dd></div>
+        <div class="hero__stat"><dt>Металлических нот</dt><dd>2 — ганметал/ч.никель + латунь-акцент</dd></div>
+        <div class="hero__stat"><dt>Цветной акцент</dt><dd>oxblood, ≤5% периметра</dd></div>
+        <div class="hero__stat"><dt>Правило контраста</dt><dd>≥3 ступени серой шкалы в детали</dd></div>
+        <div class="hero__stat"><dt>Индекс капсулы</dt><dd>DK.01</dd></div>
+      </dl>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       ПАЛИТРА
+       ============================================================ -->
+  <section id="palette">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="sec-head__num">00 / Материалы</div>
+          <h2>Палитра капсулы</h2>
+        </div>
+        <p>HEX — ориентир для технолога и производства при подборе гальваники и нити. Не более двух металлических нот на одно изделие.</p>
+      </div>
+
+      <div class="palette-grid">
+
+        <div class="swatch">
+          <div class="swatch__field" style="background:linear-gradient(160deg, var(--gm-hi), var(--gm-base) 55%, var(--gm-shadow));">
+            <div class="swatch__brush"></div>
+          </div>
+          <p class="swatch__name">Ганметал / сатин</p>
+          <p class="swatch__role">Основное поле — вся функциональная фурнитура</p>
+          <div class="swatch__hex"><span>ПОЛЕ</span><span>#4A4D54</span></div>
+        </div>
+
+        <div class="swatch">
+          <div class="swatch__field" style="background:linear-gradient(160deg,#c7cbd2, var(--gm-hi) 60%, var(--gm-mid));">
+            <div class="swatch__brush"></div>
+          </div>
+          <p class="swatch__name">Полированная фаска</p>
+          <p class="swatch__role">Кромка, вершины рельефа — узкая, не более 10% площади</p>
+          <div class="swatch__hex"><span>ВЫСШАЯ ТОЧКА</span><span>#A3A7AF</span></div>
+        </div>
+
+        <div class="swatch">
+          <div class="swatch__field" style="background:linear-gradient(160deg,#2c2e33, var(--bn-base) 60%, #0f1013);">
+            <div class="swatch__brush"></div>
+          </div>
+          <p class="swatch__name">Чёрный никель</p>
+          <p class="swatch__role">Мелкие детали: люверсы, D-кольца, цепь, стоппер</p>
+          <div class="swatch__hex"><span>БАЗА</span><span>#1D1E22</span></div>
+        </div>
+
+        <div class="swatch">
+          <div class="swatch__field" style="background:linear-gradient(160deg, var(--brass-hi), var(--brass-base) 55%, var(--brass-shadow));">
+            <div class="swatch__brush tex-brush-brass"></div>
+          </div>
+          <p class="swatch__name">Оксидированная латунь</p>
+          <p class="swatch__role">Премиальный акцент — только шильда, и подслой на кромке при истирании</p>
+          <div class="swatch__hex"><span>БАЗА</span><span>#5E4527</span></div>
+        </div>
+
+        <div class="swatch">
+          <div class="swatch__field" style="background:linear-gradient(160deg, var(--oxblood-hi), var(--oxblood) 70%, #2c0a10);"></div>
+          <p class="swatch__name">Oxblood</p>
+          <p class="swatch__role">Единственный цветной акцент — маркер, не рамка. ≤5% периметра детали</p>
+          <div class="swatch__hex"><span>АКЦЕНТ</span><span>#591420</span></div>
+        </div>
+
+        <div class="swatch">
+          <div class="swatch__field" style="background:linear-gradient(160deg,#3c3c40, var(--graphite) 60%, #0f0f10);"></div>
+          <p class="swatch__name">Графит — нить</p>
+          <p class="swatch__role">Вся отстрочка капсулы, тон-в-тон, утяжелённая</p>
+          <div class="swatch__hex"><span>НИТЬ</span><span>#2B2B2E</span></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       ПРАВИЛО КОНТРАСТА
+       ============================================================ -->
+  <section id="contrast-rule">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="sec-head__num">00 / Проверка</div>
+          <h2>Правило трёх ступеней</h2>
+        </div>
+        <p>Мёртвый мат без единой светлой точки — деталь пропадает в превью 200×200&nbsp;px карточки WB/Ozon. Показано на пуговице, самом нагруженном носителе идентичности.</p>
+      </div>
+
+      <div class="contrast-layout">
+        <div>
+          <div class="btn-wrap" style="transform:scale(1.35); transform-origin:top left; margin-bottom:34px;">
+            <div class="btn-knurl"></div>
+            <div class="btn-disc"><div class="tex-brush-dark" style="position:absolute;inset:0;"></div></div>
+            <div class="btn-bevel"></div>
+            <div class="btn-face">
+              <div class="btn-js">JS</div>
+              <div class="btn-groove"></div>
+              <div class="btn-code">DK.01</div>
+            </div>
+          </div>
+
+          <div class="value-scale">
+            <div class="value-row">
+              <div class="value-row__sw" style="background:#9da2ab;"></div>
+              <div class="value-row__label"><b>Ступень 3 — светлая</b>полированная фаска и вершины дебосса, узкая кромка</div>
+              <div class="value-row__pct">~63%</div>
+            </div>
+            <div class="value-row">
+              <div class="value-row__sw" style="background:#54575e;"></div>
+              <div class="value-row__label"><b>Ступень 2 — среднее</b>сатин-поле, основная площадь детали</div>
+              <div class="value-row__pct">~31%</div>
+            </div>
+            <div class="value-row">
+              <div class="value-row__sw" style="background:#1c1e22;"></div>
+              <div class="value-row__label"><b>Ступень 1 — тёмная</b>впадины дебосса JS, структурная канавка</div>
+              <div class="value-row__pct">~12%</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="wb-mock">
+            <div class="wb-card">
+              <div class="wb-card__loop"></div>
+              <div class="wb-card__btn">
+                <div class="btn-wrap">
+                  <div class="btn-knurl"></div>
+                  <div class="btn-disc"><div class="tex-brush-dark" style="position:absolute;inset:0;"></div></div>
+                  <div class="btn-bevel"></div>
+                  <div class="btn-face"><div class="btn-js">JS</div></div>
+                </div>
+              </div>
+              <div class="wb-card__caption">200×200 · ПРЕВЬЮ КАРТОЧКИ</div>
+            </div>
+            <p class="wb-note">
+              <b>При масштабе карточки маркетплейса деталь не тонет в чёрном деноме</b> — работает не цвет, а перепад: тёмное поле, светлая фаска, тёмная впадина знака. Мёртвый мат без фаски здесь физически исчез бы в превью.
+            </p>
+          </div>
+          <p class="wb-note" style="margin-top:26px; max-width:520px;">
+            Перепад ≥3 ступеней серой шкалы внутри одной детали — не декларация, а проверяемое требование: он повторяется на каждой из 11 позиций капсулы через одну и ту же механику — сатиновое поле + полированная фаска + чернёная/тёмная впадина гравировки.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       ТИПОГРАФИКА
+       ============================================================ -->
+  <section id="typography">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="sec-head__num">00 / Шрифт</div>
+          <h2>Типографика</h2>
+        </div>
+        <p>Один узкий гротеск для названий, один моноширинный для кодов. Больше двух начертаний на капсулу нет. Дугового текста нигде.</p>
+      </div>
+
+      <div class="type-grid">
+        <div class="type-card">
+          <span class="type-card__tag">Узкий гротеск · основные надписи</span>
+          <p class="type-card__sample-a">JOGGER<br>STREET</p>
+          <p class="type-card__stack">font-stretch: condensed; font-weight: 800; letter-spacing: -.01em / +.15em на коротких словах;<br>стек: "Arial Narrow", "Helvetica Neue", Arial, sans-serif</p>
+          <p class="type-card__note">Плотный, промышленный, без засечек. Используется на пуговице (JS), накладке, шильде, этикетке, хэнгтеге — везде, где нужен полноразмерный знак или слово.</p>
+        </div>
+        <div class="type-card">
+          <span class="type-card__tag">Моноширинный · коды и серийные пометки</span>
+          <p class="type-card__sample-b">DK.01 · 17MM</p>
+          <p class="type-card__stack">letter-spacing: .14em–.32em; вес 400–500;<br>стек: ui-monospace, "SF Mono", "Cascadia Mono", "JetBrains Mono", Consolas, "Roboto Mono", monospace</p>
+          <p class="type-card__note">DIN-логика, трафаретная логика. Единственное место, где вместо слов работают цифро-буквенные индексы — замена наследственных маркеров вроде «EST.20XX».</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       11 ПОЗИЦИЙ
+       ============================================================ -->
+  <section id="positions">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="sec-head__num">01–11 / Пул фурнитуры</div>
+          <h2>Спецификация деталей</h2>
+        </div>
+        <p>Стилизованная графическая репрезентация формы, фактуры и раскладки знака — не фотография. Точные допуски и стойкость покрытий — зона технолога, следующий шаг.</p>
+      </div>
+
+      <div class="positions-grid">
+
+        <!-- 01 — ПУГОВИЦА -->
+        <article class="card card--featured" id="pos-01">
+          <div class="card__top">
+            <span class="card__num">01</span>
+            <h3 class="card__title">Пуговица джинсовая</h3>
+            <span class="card__dim">⌀17 ММ</span>
+          </div>
+          <div class="card__stage">
+            <div class="btn-wrap">
+              <div class="btn-knurl"></div>
+              <div class="btn-disc"><div class="tex-brush-dark" style="position:absolute;inset:0;"></div></div>
+              <div class="btn-bevel"></div>
+              <div class="btn-face">
+                <div class="btn-js">JS</div>
+                <div class="btn-groove"></div>
+                <div class="btn-code">DK.01</div>
+              </div>
+            </div>
+          </div>
+          <div class="card__tags"><span class="chip">чёрный никель</span><span class="chip">сатин + фаска</span><span class="chip">накатка</span><span class="chip">слепой дебосс</span></div>
+          <p class="card__text">Круговая композиция и «EST.2018» сняты полностью. JS — слепой дебосс тон-в-тон по центру; вместо кольца-рамки — прямая структурная канавка; под ней <b>DK.01</b> моноширинным. Главный носитель идентичности капсулы — здесь строже всего выдержаны три ступени контраста.</p>
+          <div class="card__where">Расположение: <b>гульфик</b></div>
+        </article>
+
+        <!-- 02 — ХОЛЬНИТЕНЫ -->
+        <article class="card" id="pos-02">
+          <div class="card__top">
+            <span class="card__num">02</span>
+            <h3 class="card__title">Хольнитены</h3>
+            <span class="card__dim">⌀9 ММ</span>
+          </div>
+          <div class="card__stage">
+            <div class="riv-disc">
+              <div class="tex-brush-dark" style="position:absolute;inset:0;border-radius:50%;"></div>
+              <div class="riv-bevel">
+                <div class="riv-star">
+                  <svg viewBox="0 0 40 40"><polygon points="20,1 23,15 39,12 27,21 34,39 20,29 6,39 13,21 1,12 17,15" fill="#8b8e95"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card__tags"><span class="chip">чёрный никель</span><span class="chip">плоский диск</span><span class="chip">без текста</span></div>
+          <p class="card__text">Купол заменён на плоский диск с фаской. Текст снят полностью — на 9&nbsp;мм слово нечитаемо; вместо него заточенный маркер-звезда (острые лучи разной длины взамен мягкого «блика»). Масштабирование знака вниз, пустота вокруг маркера — по правилу.</p>
+          <div class="card__where">Расположение: <b>карманы, 5 шт.</b></div>
+        </article>
+
+        <!-- 03 — СОБАЧКА МОЛНИИ -->
+        <article class="card" id="pos-03">
+          <div class="card__top">
+            <span class="card__num">03</span>
+            <h3 class="card__title">Собачка молнии</h3>
+            <span class="card__dim">18×9 ММ</span>
+          </div>
+          <div class="card__stage">
+            <div class="zip-stage-inner">
+              <div class="zip-bail"></div>
+              <div class="zip-tab"><div class="zip-tab__mark">J</div></div>
+              <div class="zip-teeth"></div>
+            </div>
+          </div>
+          <div class="card__tags"><span class="chip">ЦАМ</span><span class="chip">чёрный никель</span><span class="chip">фрагментация</span></div>
+          <p class="card__text">Джинсовая версия вместо 35×12&nbsp;мм от худи — компакт под ширинку. Знак не показан целиком: обрезан кромкой затяжки, виден лишь характерный фрагмент. Тесьма и зубцы молнии — чернёные, иначе одна деталь рушит всю тёмную историю.</p>
+          <div class="card__where">Расположение: <b>ширинка</b></div>
+        </article>
+
+        <!-- 04 — НАКЛАДКА -->
+        <article class="card card--featured" id="pos-04">
+          <div class="card__top">
+            <span class="card__num">04</span>
+            <h3 class="card__title">Кожаная накладка</h3>
+            <span class="card__dim">70×40 ММ</span>
+          </div>
+          <div class="card__stage">
+            <div class="patch">
+              <div class="patch__guilloche guilloche"></div>
+              <div class="patch__center">
+                <div class="patch__js">JS</div>
+              </div>
+              <div class="patch__est">EST.2018</div>
+              <svg viewBox="0 0 270 154" style="position:absolute; inset:0; width:100%; height:100%;">
+                <polygon points="6,6 264,6 264,120 218,148 6,148" fill="none" stroke="#48484c" stroke-width="2.4" stroke-dasharray="9 6"/>
+                <line x1="222" y1="145" x2="234" y2="135" stroke="#82212c" stroke-width="3.4" stroke-linecap="round"/>
+              </svg>
+            </div>
+          </div>
+          <div class="card__tags"><span class="chip">кожа антрацит</span><span class="chip">гильош-фон</span><span class="chip">графит + oxblood-маркер</span></div>
+          <p class="card__text">Паттерн заменён с камуфляжного на гильош. Строчка — графит тон-в-тон утяжелённой нитью по всему периметру, кроме одной точки: срезанный угол (системная асимметрия) отмечен единственным <b>oxblood</b>-стежком 3–5&nbsp;мм — асимметрия и цветной маркер совмещены в одном жесте, а не в двух. «EST.2018» не исчезает — уходит мелким кеглем в угол.</p>
+          <div class="card__where">Расположение: <b>пояс сзади, центр</b></div>
+        </article>
+
+        <!-- 05 — ТКАНАЯ ЭТИКЕТКА -->
+        <article class="card" id="pos-05">
+          <div class="card__top">
+            <span class="card__num">05</span>
+            <h3 class="card__title">Тканая этикетка</h3>
+            <span class="card__dim">НОВОЕ</span>
+          </div>
+          <div class="card__stage">
+            <div class="label-weave">
+              <div class="label-weave__t">
+                <div class="label-weave__a">JOGGER STREET</div>
+                <div class="label-weave__b">EST.2018 · DK.01</div>
+              </div>
+            </div>
+          </div>
+          <div class="card__tags"><span class="chip">жаккард</span><span class="chip">чёрное на чёрном</span><span class="chip">полный текст</span></div>
+          <p class="card__text">Единственная позиция капсулы, где сохраняется полный исторический текст — потому что это единственное место, которое покупатель разглядывает в упор при примерке, а не на фото карточки с двух метров. Читается только фактурой и лёгким блеском нити.</p>
+          <div class="card__where">Расположение: <b>пояс изнутри, по центру</b></div>
+        </article>
+
+        <!-- 06 — ШИЛЬДА -->
+        <article class="card" id="pos-06">
+          <div class="card__top">
+            <span class="card__num">06</span>
+            <h3 class="card__title">Металлическая шильда</h3>
+            <span class="card__dim">НОВОЕ</span>
+          </div>
+          <div class="card__stage">
+            <div class="shield">
+              <div class="tex-brush-brass" style="position:absolute; inset:0;"></div>
+              <div class="shield__rivet" style="left:16px;"></div>
+              <div class="shield__rivet" style="right:16px;"></div>
+              <div class="shield__js">JS</div>
+            </div>
+          </div>
+          <div class="card__tags"><span class="chip">оксид. латунь</span><span class="chip">единств. акцент</span><span class="chip">фрагментация</span></div>
+          <p class="card__text">Единственная деталь всей капсулы в оксидированной латуни как самостоятельном покрытии — премиальный акцент ровно на одной позиции, без нарушения лимита «не больше двух металлических нот». Знак обрезан кромкой среза угла, целиком не показан.</p>
+          <div class="card__where">Расположение: <b>монетный карман</b></div>
+        </article>
+
+        <!-- 07 — ЛЮВЕРСЫ -->
+        <article class="card" id="pos-07">
+          <div class="card__top">
+            <span class="card__num">07</span>
+            <h3 class="card__title">Люверсы / блочки</h3>
+            <span class="card__dim">⌀5,5–6 ММ</span>
+          </div>
+          <div class="card__stage" style="position:relative;">
+            <div class="eyelets-row">
+              <div class="eyelet"></div>
+              <div class="eyelet"></div>
+            </div>
+            <div class="eyelets-band"></div>
+          </div>
+          <div class="card__tags"><span class="chip">чёрный никель</span><span class="chip">без текста</span><span class="chip">функциональные</span></div>
+          <p class="card__text">Не самостоятельное украшение, а выходы внутренней кулиски — функциональная часть системы «пояс регулируется шнуром» (см. позицию 10). Металл как деталь механизма, не как акцент ради акцента.</p>
+          <div class="card__where">Расположение: <b>пояс, по бокам от накладки</b></div>
+        </article>
+
+        <!-- 08 — D-КОЛЬЦА -->
+        <article class="card" id="pos-08">
+          <div class="card__top">
+            <span class="card__num">08</span>
+            <h3 class="card__title">D-кольца</h3>
+            <span class="card__dim">НОВОЕ</span>
+          </div>
+          <div class="card__stage">
+            <div class="dring-row">
+              <div class="dring-col">
+                <svg viewBox="0 0 40 40" width="46" height="46"><path d="M16 6 L16 34 A14 14 0 1 1 16 6 Z" fill="none" stroke="var(--gm-hi)" stroke-width="5"/></svg>
+                <div class="webbing-tab"></div>
+                <span class="dring-col__cap">функц.</span>
+              </div>
+              <div class="dring-col">
+                <svg viewBox="0 0 40 40" width="30" height="30"><path d="M16 6 L16 34 A14 14 0 1 1 16 6 Z" fill="none" stroke="var(--gm-mid)" stroke-width="5"/></svg>
+                <div class="belt-loop"></div>
+                <span class="dring-col__cap">декор.</span>
+              </div>
+            </div>
+          </div>
+          <div class="card__tags"><span class="chip">чёрный никель</span><span class="chip">2 роли</span></div>
+          <p class="card__text">Функциональное — на усиленной петле-таб правого бедра, держит нагрузку и служит якорем для съёмной цепи (позиция 9). Декоративное — малое кольцо в основании шлёвки, чистый hardware-жест без нагрузки. Роли не путаются местами.</p>
+          <div class="card__where">Расположение: <b>бедро / шлёвка</b></div>
+        </article>
+
+        <!-- 09 — ЦЕПЬ -->
+        <article class="card" id="pos-09">
+          <div class="card__top">
+            <span class="card__num">09</span>
+            <h3 class="card__title">Съёмная цепь</h3>
+            <span class="card__dim">НОВОЕ</span>
+          </div>
+          <div class="card__stage chain-stage">
+            <svg viewBox="0 0 240 44">
+              <path d="M8 22 a8 8 0 1 0 16 0 a8 8 0 1 0 -16 0" fill="none" stroke="var(--gm-hi)" stroke-width="3.4"/>
+              <ellipse cx="34" cy="22" rx="15" ry="8" fill="none" stroke="var(--gm-mid)" stroke-width="4"/>
+              <ellipse cx="55" cy="22" rx="8" ry="15" fill="none" stroke="var(--gm-hi)" stroke-width="4"/>
+              <ellipse cx="76" cy="22" rx="15" ry="8" fill="none" stroke="var(--gm-mid)" stroke-width="4"/>
+              <ellipse cx="97" cy="22" rx="8" ry="15" fill="none" stroke="var(--gm-hi)" stroke-width="4"/>
+              <ellipse cx="118" cy="22" rx="15" ry="8" fill="none" stroke="var(--gm-mid)" stroke-width="4"/>
+              <ellipse cx="139" cy="22" rx="8" ry="15" fill="none" stroke="var(--gm-hi)" stroke-width="4"/>
+              <ellipse cx="160" cy="22" rx="15" ry="8" fill="none" stroke="var(--gm-mid)" stroke-width="4"/>
+              <ellipse cx="181" cy="22" rx="8" ry="15" fill="none" stroke="var(--gm-hi)" stroke-width="4"/>
+              <ellipse cx="202" cy="22" rx="15" ry="8" fill="none" stroke="var(--gm-mid)" stroke-width="4"/>
+              <path d="M222 22 a8 8 0 1 0 16 0 a8 8 0 1 0 -16 0" fill="none" stroke="var(--gm-hi)" stroke-width="3.4"/>
+              <path d="M226 14 L234 8 L234 20 Z" fill="var(--gm-mid)"/>
+            </svg>
+          </div>
+          <div class="card__tags"><span class="chip">чёрный никель</span><span class="chip">пружинная защёлка</span><span class="chip">съёмная</span></div>
+          <p class="card__text">Крепится к уже существующему функциональному D-кольцу (позиция 8) — не создаёт отдельную оснастку. Лёгкая пружинная защёлка вместо полноразмерного карабина: рабочая деталь снаряжения, не бижутерия. Съёмность закрывает стирку, логистику и апсейл отдельным SKU.</p>
+          <div class="card__where">Расположение: <b>D-кольцо → шлёвка</b></div>
+        </article>
+
+        <!-- 10 — ШНУР СО СТОППЕРОМ -->
+        <article class="card" id="pos-10">
+          <div class="card__top">
+            <span class="card__num">10</span>
+            <h3 class="card__title">Шнур со стоппером</h3>
+            <span class="card__dim">НОВОЕ</span>
+          </div>
+          <div class="card__stage">
+            <div class="cord-stage">
+              <div class="cord-line cord-l"></div>
+              <div class="cord-line cord-r"></div>
+              <div class="cord-aglet cord-aglet-l"></div>
+              <div class="cord-aglet cord-aglet-r"></div>
+              <div class="cord-stop"></div>
+            </div>
+          </div>
+          <div class="card__tags"><span class="chip">шнур чёрный</span><span class="chip">чёрный никель</span><span class="chip">скрытый узел</span></div>
+          <p class="card__text">Проходит через внутреннюю кулиску пояса, выходит через люверсы (позиция 7) по бокам от накладки. Стоппер в собранном виде скрыт под накладкой — виден результат регулировки, не сама механика. Функция, не декор.</p>
+          <div class="card__where">Расположение: <b>кулиска пояса</b></div>
+        </article>
+
+        <!-- 11 — ХЭНГТЕГ -->
+        <article class="card" id="pos-11">
+          <div class="card__top">
+            <span class="card__num">11</span>
+            <h3 class="card__title">Хэнгтег с пломбой</h3>
+            <span class="card__dim">НОВОЕ</span>
+          </div>
+          <div class="card__stage">
+            <div class="tag-card">
+              <div class="board-grain" style="position:absolute; inset:0;"></div>
+              <div class="tag-loop"></div>
+              <div class="tag-hole"></div>
+              <div class="tag-js">JS</div>
+              <div class="tag-code">DK.01</div>
+              <div class="tag-bars">
+                <span style="height:14px;"></span><span style="height:8px;"></span><span style="height:12px;"></span>
+                <span style="height:6px;"></span><span style="height:14px;"></span><span style="height:10px;"></span>
+                <span style="height:7px;"></span><span style="height:13px;"></span>
+              </div>
+            </div>
+          </div>
+          <div class="card__tags"><span class="chip">чёрный картон</span><span class="chip">матовая фольга</span><span class="chip">пломба ч.никель</span></div>
+          <p class="card__text">Плотный чёрный картон, конгрев матовым чёрным (не золото, не блеск). Тот же системный срез угла, что на накладке и шильде — знак фрагментирован им же. Пломба-стяжка подана как деталь контроля качества, а не бирка на верёвочке.</p>
+          <div class="card__where">Расположение: <b>крепится на упаковке</b></div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer>
+    <div class="wrap">
+      <div class="foot-row">
+        <div>
+          <div class="foot-brand">JOGGER STREET <span>JS DARK · DK.01</span></div>
+          <p class="foot-note" style="margin-top:12px;">
+            Стилизованная графическая репрезентация фурнитуры капсулы — не фотография изделия. Материалы, глубина рельефа и производственные допуски описаны в относительных терминах; точные параметры под сплав и метод нанесения — зона технолога, следующий шаг конвейера.
+          </p>
+        </div>
+        <div class="foot-tag">Made for the streets</div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

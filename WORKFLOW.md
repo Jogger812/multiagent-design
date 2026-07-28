@@ -44,3 +44,23 @@
 Ведут: **graphic-designer** + **stylist-art-director**
 Что происходит: размерная сетка, инфографика, рич-контент, знаковая система, промо-материалы, визуализация упаковки; референсы для фотосъёмки.
 **Гейт 6:** финальное утверждение перед выходом на маркетплейс.
+
+---
+
+## Вход и выход по этапам
+
+| Этап | Агент | Вход (ресурсы) | Выход (артефакты) |
+|---|---|---|---|
+| 0. Бриф | оркестратор | Запрос Ивана; `MEMORY.md`, `PROJECTS.md` из `~/workspace/` | `_brief.md` — задача, границы, утверждённый чек-лист артефактов |
+| 1. Аналитика | analyst | Бриф; `knowledge/jogger-street/metrics/` (CSV); данные WB/Ozon; открытые источники по рынку | `analiz-ca.md`, `konkurenty.md`, `trendy.md`, `gipotezy.md`, `assortimentnaya-matrica.md`, `cenovaya-politika-draft.md` |
+| 2. Концепция | stylist-art-director | Гейт 1 (матрица + ЦА); `knowledge/jogger-street/company.md`, `references.md` | `koncepciya-kollekcii.md`, `istoriya-kollekcii.md`, `strategiya-zapuska.md`, `etapy-vyhoda.md` |
+| 3. Визуальный язык | graphic-designer | Гейт 2 (утверждённая коллекция); `knowledge/jogger-street/references.md` | `mudbord.html`, `cvetovaya-lineyka.md`, `identika.md` |
+| 4. Тех-пакет | technologist | Гейт 3 (палитра, айдентика); `knowledge/jogger-street/fittings-hardware.md` — бренд-стандарт фурнитуры | `teh-eskiz.md`, `teh-opisanie.md`, `specifikaciya-furnitury.md`, `tz-na-proizvodstvo.md`, `sebestoimost.md`, `chek-list-kollekcii.md` |
+| 5. Экономика | analyst | Гейт 4 (себестоимость); рыночные цены из этапа 1 | `cenovaya-politika-final.md`, `unit-ekonomika.md` |
+| 6. Упаковка | graphic-designer + stylist-art-director | Гейт 5 (цена); тех-пакет; айдентика | `razmernaya-setka.md`, `infografika.html`, `rich-kontent.html`, `znakovaya-sistema.md`, `promo-materialy.md`, `vizualizaciya-upakovki.md`, `referensy-fotosessii.md` |
+
+## Где лежат артефакты
+
+`artifacts/<название-задачи>/<номер-этапа>-<этап>/` — например `artifacts/osen-2026/1-analitika/analiz-ca.md`.
+
+Агент кладёт результат туда сам, оркестратор проверяет наличие файла перед тем как закрыть этап. Нет файла — этап не сдан.
